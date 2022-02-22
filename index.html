@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scrapper</title>
+</head>
+
+<body>
+    <form action="/" enctype="text/plain" >
+        <input type="text" name="url">
+        <input type="submit" value="submit">
+    </form>
+    <div>
+        <ul>
+            <li> 
+                <span>URL: </span>
+                 <span id="url"></span>
+             </li>
+             <br>
+           <li> 
+               <span>HTML Version: </span>
+                <span id="html_version"></span>
+            </li>
+            <br>
+            <li> 
+                <span>Page Title: </span>
+                <span id="page_title"></span>
+            </li>
+            <br>
+            <li> 
+                <span>Headings count by level: </span>
+                <ul>
+                    <span id="heading_count"></span>
+                </ul>
+            </li>
+            <br>
+            <li>
+                <span>Internal Link: </span>
+                <span id="internal_link"></span>
+            </li>
+            <br>
+            <li>
+                <span>External Link: </span>
+                <span id="external_link"></span>
+            </li>
+            <br>
+            <li>
+                <span>Amount of inaccessible links: </span>
+                <span id="inaccessible_links"></span>
+            </li>
+            <br>
+            <li>
+                <span>If a page contains a login form: </span>
+                <span id="is_contain_login_form"></span>
+            </li>
+            <br>
+        </ul>
+    </div>
+    <script>
+        function handleSubmit(event) {
+            
+            event.preventDefault();
+
+            const data = new FormData(event.target);
+            
+            const body = JSON.stringify(Object.fromEntries(data.entries()))
+            const xmlhttp = new XMLHttpRequest();
+
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+                    var jsonResponse = JSON.parse(xmlhttp.responseText);
+                    console.log(jsonResponse)
+                    document.getElementById("url").innerText = jsonResponse.url;
+                    document.getElementById("html_version").innerText = jsonResponse.html_version;
+                    document.getElementById("page_title").innerText = jsonResponse.page_title;
+                    // document.getElementById("heading_count").innerText = jsonResponse.HTMLVersion;
+                    var headingData = ""
+                    for(var i = 1; i <=6; i++) {
+                        const name = "Heading "+ i
+                        const key = "heading_"+i
+                        const val = (typeof jsonResponse.headings_count[key] === 'undefined') ? 0 : jsonResponse.headings_count[key];
+                        headingData += `<li><span>` + name + `: </span><span>`+val+`</span></li>`
+                    }
+                    document.getElementById("heading_count").innerHTML = headingData
+
+                    document.getElementById("internal_link").innerText = jsonResponse.link_details.internal_link;
+                    document.getElementById("external_link").innerText = jsonResponse.link_details.external_link;
+                    document.getElementById("inaccessible_links").innerText = jsonResponse.link_details.inaccessible_link;
+                    document.getElementById("is_contain_login_form").innerText = jsonResponse.is_contain_login_form;
+
+                }
+            }
+
+        
+            xmlhttp.open("POST", "/parse");
+            xmlhttp.setRequestHeader("Content-type", "application/json");
+            xmlhttp.send(body);
+
+            
+        }
+        const form = document.querySelector('form');
+        form.addEventListener('submit', handleSubmit);
+
+
+        
+        // const xmlhttp = new XMLHttpRequest();
+        
+        // xmlhttp.open("POST", "json_demo_html_table.php");
+        // xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        // xmlhttp.send("x=" + dbParam);
+        </script>
+</body>
+
+</html>
